@@ -9,7 +9,7 @@ const { PUPPETEER_WS_ENDPOINT, PAGE_COUNT = "5", PORT = 8999 } = process.env;
 (async () => {
   const browser = PUPPETEER_WS_ENDPOINT
     ? await puppeteer.connect({ browserWSEndpoint: PUPPETEER_WS_ENDPOINT })
-    : await puppeteer.launch({ headless: false, slowMo: 8 });
+    : await puppeteer.launch({ headless: true });
 
   console.log("connected");
 
