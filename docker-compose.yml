@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  app:
+    image: node
+    command: bash -c "cd /usr/app && npm run bootstrap"
+    volumes:
+      - .:/usr/app
+    ports:
+      - "8999:8999"
+    environment:
+      PUPPETEER_WS_ENDPOINT: "ws://browserless:3000/?--user-data-dir=./tmp/session-data"
+      PAGE_COUNT: "5"
+    depends_on:
+      - browserless
+
+  browserless:
+    image: browserless/chrome
+    restart: always
+    environment:
+      CONNECTION_TIMEOUT: "-1"
