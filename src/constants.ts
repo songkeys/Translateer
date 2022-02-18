@@ -11,6 +11,8 @@ export const PART_OF_SPEECH: Record<string, string> = {
   连词: "conjunction",
   缩写词: "abbreviation",
   冠词: "title",
+  前缀: "prefix",
+  后缀: "suffix",
 };
 
 export const FREQUENCY: Record<string, string> = {
