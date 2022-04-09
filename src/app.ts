@@ -1,15 +1,17 @@
 import Fastify from "fastify";
-import PagePool from "./pagepool";
-import puppeteer from "./puppeteer";
+import PagePool from "./browser/pagepool";
+import puppeteer from "./browser/puppeteer";
 
 const fastify = Fastify({ logger: true });
 
 const { PUPPETEER_WS_ENDPOINT, PAGE_COUNT = "5", PORT = 8999 } = process.env;
 
 (async () => {
+  console.log("connecting to puppeteer...");
+
   const browser = PUPPETEER_WS_ENDPOINT
     ? await puppeteer.connect({ browserWSEndpoint: PUPPETEER_WS_ENDPOINT })
-    : await puppeteer.launch({ headless: true });
+    : await puppeteer.launch({ headless: process.env.DEBUG !== "true" });
 
   console.log("connected");
 

@@ -26,7 +26,7 @@ export default class PagePool {
               req.continue();
             }
           });
-          await page.goto("https://translate.google.cn/", {
+          await page.goto("https://translate.google.com/", {
             waitUntil: "networkidle2",
           });
           return page;
