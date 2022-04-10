@@ -57,11 +57,11 @@ Visit <https://t.song.work/> to see more usage.
 
 See the markdown table below:
 
-| Variable                | Description                                  | Default                                          |
-| ----------------------- | -------------------------------------------- | ------------------------------------------------ |
-| `PORT`                  | Port to listen on                            | `8999`                                           |
-| `PUPPETEER_WS_ENDPOINT` | WebSocket endpoint of the Puppeteer instance | `undefined` or `ws://browserless:3000` in docker |
-| `PAGE_COUNT`            | Number of browser pages to hold for speedup  | `5`                                              |
+| Variable                | Description                                  | Default                                        |
+| ----------------------- | -------------------------------------------- | ---------------------------------------------- |
+| `PORT`                  | Port to listen on                            | `8999`                                         |
+| `PUPPETEER_WS_ENDPOINT` | WebSocket endpoint of the Puppeteer instance | undefined or `ws://browserless:3000` in docker |
+| `PAGE_COUNT`            | Number of browser pages to hold for speedup  | `5`                                            |
 
 ## Raycast Extension
 

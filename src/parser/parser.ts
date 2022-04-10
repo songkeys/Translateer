@@ -35,23 +35,102 @@ export const parsePage = async (
     lite: boolean;
   }
 ) => {
-  // refresh page to get the result
-  await page.evaluate(
-    ([from, to, text]) => {
-      location.href = `?sl=${from}&tl=${to}&text=${encodeURIComponent(text)}`;
-    },
-    [from, to, text]
+  // click clear button
+  await page.$eval("button[aria-label='Clear source text']", (btn) =>
+    (btn as HTMLButtonElement).click()
   );
 
+  // switch source language
+  await page.evaluate((fromSelector) => {
+    const from = document.querySelectorAll<HTMLElement>(fromSelector)[0];
+    from.click();
+  }, `c-wiz[data-node-index='2;0'] div[data-language-code='${from}']`);
+
+  // switch target language
+  await page.evaluate((toSelector) => {
+    const to = document.querySelectorAll<HTMLElement>(toSelector)[1];
+    to.click();
+  }, `c-wiz[data-node-index='2;0'] div[data-language-code='${to}']`);
+
+  // type text
+  const textareaSelector = "textarea[aria-label='Source text']";
+  await page.$eval(
+    textareaSelector,
+    (textarea, text) =>
+      ((textarea as HTMLTextAreaElement).value = text as string),
+    text
+  );
+  await page.type(textareaSelector, " ");
+
   // translating...
-  await page.waitForSelector(`span[lang=${to}]`);
+  const targetSelector = `span[data-language-for-alternatives=${to}] > span`;
+  await page.waitForSelector(targetSelector);
 
   // get translated text
   const result = await page.evaluate(
-    (to) =>
-      (document.querySelectorAll(`span[lang=${to}]`)[0] as HTMLElement)
-        .innerText,
-    to
+    (targetSelector) =>
+      document
+        .querySelector<HTMLElement>(targetSelector)!
+        .innerText!.replace(/[\u200B-\u200D\uFEFF]/g, ""), // remove zero-width space
+    targetSelector
+  );
+
+  // get from
+  const fromISO = await page.evaluate(() =>
+    document
+      .querySelector<HTMLElement>("div[data-original-language]")!
+      .getAttribute("data-original-language")
+  );
+
+  // get did you mean
+  const fromDidYouMean = await page.evaluate(() => {
+    const didYouMeanBlock = document.querySelector<HTMLElement>("html-blob");
+    const hasDidYouMean = ["Did you mean:", "Showing translation for"].some(
+      (t) =>
+        didYouMeanBlock?.parentElement?.parentElement?.innerHTML.includes(t)
+    );
+
+    return hasDidYouMean ? didYouMeanBlock?.innerText : undefined;
+  });
+
+  // get suggestions
+  const fromSuggestions =
+    lite || from === "auto" // auto lang doesn't have suggestions
+      ? undefined
+      : await page.evaluate(() => {
+          const sgsBlocks = Array.from(
+            document.querySelectorAll<HTMLElement>('ul[role="listbox"] > li')
+          );
+          return sgsBlocks.length === 0
+            ? undefined
+            : sgsBlocks.map((b) => {
+                return {
+                  text: b.children[0].textContent!.replace(
+                    /[\u200B-\u200D\uFEFF]/g,
+                    ""
+                  ),
+                  translation: b.children[1].textContent!.replace(
+                    /[\u200B-\u200D\uFEFF]/g,
+                    ""
+                  ),
+                };
+              });
+        });
+
+  // get from pronunciation
+  const fromPronunciation = await page.evaluate(
+    () =>
+      document
+        .querySelector<HTMLElement>('div[data-location="1"] > div')!
+        .innerText!.replace(/[\u200B-\u200D\uFEFF]/g, "") || undefined
+  );
+
+  // get pronunciation
+  const pronunciation = await page.evaluate(
+    () =>
+      document
+        .querySelector<HTMLElement>('div[data-location="2"] > div')!
+        .innerText!.replace(/[\u200B-\u200D\uFEFF]/g, "") || undefined
   );
 
   // get examples
@@ -61,10 +140,15 @@ export const parsePage = async (
 
   const examples = lite
     ? undefined
-    : await page.evaluate<() => IExamples>(() =>
-        Array.from(document.querySelectorAll("html-blob")).map(
-          (blob) => blob.textContent!
-        )
+    : await page.evaluate<(hasDidYouMean: boolean) => IExamples>(
+        (hasDidYouMean) => {
+          const egBlocks = Array.from(document.querySelectorAll("html-blob"));
+          if (hasDidYouMean) {
+            egBlocks.shift();
+          }
+          return egBlocks.map((blob) => blob.textContent!);
+        },
+        fromDidYouMean !== undefined
       );
 
   // get definitions
@@ -75,9 +159,9 @@ export const parsePage = async (
 
         if (
           !document
-            .querySelectorAll<HTMLElement>(
+            .querySelector<HTMLElement>(
               "c-wiz > div > div > c-wiz > div > c-wiz > div > c-wiz > div > div > div > div:nth-child(1) > div > div"
-            )[0]
+            )
             ?.innerText.includes("Definitions of")
         ) {
           return ret;
@@ -190,37 +274,43 @@ export const parsePage = async (
     ? undefined
     : await page.evaluate<() => ITranslations>(() => {
         const ret: ITranslations = {};
-        Array.from(document.querySelectorAll("table > tbody")).forEach(
-          (tbody) => {
-            const [tr0, ...trs] = Array.from(tbody.children);
-            const [th0, ...tds] = Array.from(tr0.children);
-            const PoS = th0.textContent!;
-            trs.push({ children: tds } as unknown as Element);
-            ret[PoS] = trs.map(({ children }) => {
-              const [trans, reverseTranses, freq] = Array.from(children);
-              return {
-                translation: trans.textContent?.trim()!,
-                reversedTranslations: Array.from(
-                  reverseTranses.children[0].children
-                )
-                  .map((c) => c.textContent!.replace(", ", "").split(", "))
-                  .flat(),
-                frequency:
-                  freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
-                    ?.getAttribute("aria-label")
-                    ?.toLowerCase() ??
-                  freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
-                    ?.getAttribute("aria-label")
-                    ?.toLowerCase()!,
-              };
-            });
-          }
-        );
+        Array.from(
+          document.querySelectorAll<HTMLElement>("table > tbody")
+        ).forEach((tbody) => {
+          const [tr0, ...trs] = Array.from(tbody.children);
+          const [th0, ...tds] = Array.from(tr0.children);
+          const PoS = th0.textContent!;
+          if (PoS === "") return;
+          trs.push({ children: tds } as unknown as Element);
+          ret[PoS] = trs.map(({ children }) => {
+            const [trans, reverseTranses, freq] = Array.from(children);
+            return {
+              translation: trans.textContent?.trim()!,
+              reversedTranslations: Array.from(
+                reverseTranses.children[0].children
+              )
+                .map((c) => c.textContent!.replace(", ", "").split(", "))
+                .flat(),
+              frequency:
+                freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
+                  ?.getAttribute("aria-label")
+                  ?.toLowerCase() ??
+                freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
+                  ?.getAttribute("aria-label")
+                  ?.toLowerCase()!,
+            };
+          });
+        });
         return ret;
       });
 
   return {
     result,
+    fromISO,
+    fromDidYouMean,
+    fromSuggestions,
+    fromPronunciation,
+    pronunciation,
     examples,
     definitions,
     translations,

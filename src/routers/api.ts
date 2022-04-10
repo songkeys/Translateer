@@ -39,40 +39,42 @@ export default ((fastify, opts, done) => {
         return;
       }
 
-      let result, examples, definitions, translations;
+      let response: Record<string, any>;
       try {
         const res = await parsePage(page, { text, from, to, lite });
-        result = res.result;
-        examples = res.examples;
-        definitions = res.definitions;
-        translations = res.translations;
+        response = {
+          result: res.result,
+          pronunciation: res.pronunciation,
+          from: {
+            iso: res.fromISO,
+            pronunciation: res.fromPronunciation,
+            didYouMean: res.fromDidYouMean,
+            suggestions: res.fromSuggestions,
+          },
+          definitions: res.definitions,
+          examples: res.examples,
+          translations: res.translations,
+        };
       } catch (e) {
         throw e;
       } finally {
         pagePool.releasePage(page);
       }
 
-      const packedUpRes: Record<string, any> = {
-        result,
-        examples,
-        definitions,
-        translations,
-      };
-
-      Object.keys(packedUpRes).forEach((key) => {
+      Object.keys(response).forEach((key) => {
         if (
-          packedUpRes[key] === undefined ||
-          (typeof packedUpRes[key] === "object" &&
-            Object.keys(packedUpRes[key]).length === 0) ||
-          (Array.isArray(packedUpRes[key]) && packedUpRes[key].length === 0)
+          response[key] === undefined ||
+          (typeof response[key] === "object" &&
+            Object.keys(response[key]).length === 0) ||
+          (Array.isArray(response[key]) && response[key].length === 0)
         )
-          delete packedUpRes[key];
+          delete response[key];
       });
 
       reply
         .code(200)
         .header("Content-Type", "application/json; charset=utf-8")
-        .send(packedUpRes);
+        .send(response);
     }
   );
 
