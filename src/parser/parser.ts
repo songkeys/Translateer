@@ -130,7 +130,7 @@ export const parsePage = async (
               const blocks = Array.from(rightBlock.children);
 
               // the leading block could be (local) labels
-              const hasLabels = blocks[0].childElementCount === 1;
+              const hasLabels = blocks[0].childElementCount >= 1;
               if (hasLabels) {
                 def.labels = Array.from(blocks[0].children).map(
                   (b) => b.textContent!
@@ -145,11 +145,15 @@ export const parsePage = async (
               // there may be some blocks after the definition
 
               // there may be an example
-              const hasExample =
-                blocks.length > 0 && blocks[0].children[0].tagName === "Q";
-              if (hasExample) {
-                def.example = blocks[0].children[0].textContent!;
-                blocks.shift();
+              try {
+                const hasExample =
+                  blocks.length > 0 && blocks[0].children[0].tagName === "Q";
+                if (hasExample) {
+                  def.example = blocks[0].children[0].textContent!;
+                  blocks.shift();
+                }
+              } catch {
+                throw JSON.stringify(def);
               }
 
               // there may be synonyms
@@ -202,12 +206,12 @@ export const parsePage = async (
                   .map((c) => c.textContent!.replace(", ", "").split(", "))
                   .flat(),
                 frequency:
-                  freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.getAttribute(
-                    "aria-label"
-                  ) ??
-                  freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.getAttribute(
-                    "aria-label"
-                  )!,
+                  freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
+                    ?.getAttribute("aria-label")
+                    ?.toLowerCase() ??
+                  freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
+                    ?.getAttribute("aria-label")
+                    ?.toLowerCase()!,
               };
             });
           }
