@@ -1,6 +1,6 @@
-// const puppeteerCN = require("puppeteer-cn");
-// export default puppeteerCN as typeof import("puppeteer");
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
-import puppeteer from "puppeteer";
+puppeteer.use(StealthPlugin());
 
 export default puppeteer;

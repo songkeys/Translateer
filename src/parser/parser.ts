@@ -63,7 +63,7 @@ export const parsePage = async (
   await page.type(textareaSelector, " ");
 
   // translating...
-  const targetSelector = `span[data-language-for-alternatives=${to}] > span`;
+  const targetSelector = `span[data-language-for-alternatives=${to}]`;
   await page.waitForSelector(targetSelector);
 
   // get translated text
@@ -71,7 +71,7 @@ export const parsePage = async (
     (targetSelector) =>
       document
         .querySelector<HTMLElement>(targetSelector)!
-        .innerText!.replace(/[\u200B-\u200D\uFEFF]/g, ""), // remove zero-width space
+        .parentElement!.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, ""), // remove zero-width space
     targetSelector
   );
 
