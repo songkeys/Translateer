@@ -1,153 +1,153 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/@highlightjs/cdn-assets@11.3.1/styles/atom-one-dark.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/tailwindcss@^1.5/dist/base.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/tailwindcss@^1.5/dist/components.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/@tailwindcss/typography@0.2.x/dist/typography.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/tailwindcss@^1.5/dist/utilities.min.css"
-    />
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/x-icon" href="favicon.ico" />
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/@highlightjs/cdn-assets@11.3.1/styles/atom-one-dark.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/tailwindcss@^1.5/dist/base.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/tailwindcss@^1.5/dist/components.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/@tailwindcss/typography@0.2.x/dist/typography.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/tailwindcss@^1.5/dist/utilities.min.css"
+		/>
 
-    <title>Translateer - Google Translate API</title>
-  </head>
-  <body class="bg-indigo-lightest font-mono">
-    <div class="container grid max-w-4xl mx-auto p-8">
-      <article class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl">
-        <h1 class="flex items-center">
-          <img src="logo.png" class="w-16 h-16" style="margin: 0 1rem 0 0" />
-          Translateer
-        </h1>
+		<title>Translateer - Google Translate API</title>
+	</head>
+	<body class="bg-indigo-lightest font-mono">
+		<div class="container grid max-w-4xl mx-auto p-8">
+			<article class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl">
+				<h1 class="flex items-center">
+					<img src="logo.png" class="w-16 h-16" style="margin: 0 1rem 0 0" />
+					Translateer
+				</h1>
 
-        <blockquote>A free Google Translate API using Puppeteer.</blockquote>
+				<blockquote>A free Google Translate API using Puppeteer.</blockquote>
 
-        <h2>Usage</h2>
-        <pre><code class="language-bash" id="usage-code"></code></pre>
-        <h3>Parameters</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Description</th>
-              <th>Default</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>text</td>
-              <td>string</td>
-              <td>The text to translate.</td>
-              <td><i>[Required]</i></td>
-            </tr>
-            <tr>
-              <td>from</td>
-              <td>string</td>
-              <td>The language code of the source text.</td>
-              <td><code>auto</code></td>
-            </tr>
-            <tr>
-              <td>to</td>
-              <td>string</td>
-              <td>The language code of the target text.</td>
-              <td><code>zh-CN</code></td>
-            </tr>
-            <tr>
-              <td>lite</td>
-              <td>boolean</td>
-              <td>
-                If true, only return <code>result</code> for the translated
-                text.
-              </td>
-              <td><code>false</code></td>
-            </tr>
-          </tbody>
-        </table>
+				<h2>Usage</h2>
+				<pre><code class="language-bash" id="usage-code"></code></pre>
+				<h3>Parameters</h3>
+				<table>
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Type</th>
+							<th>Description</th>
+							<th>Default</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>text</td>
+							<td>string</td>
+							<td>The text to translate.</td>
+							<td><i>[Required]</i></td>
+						</tr>
+						<tr>
+							<td>from</td>
+							<td>string</td>
+							<td>The language code of the source text.</td>
+							<td><code>auto</code></td>
+						</tr>
+						<tr>
+							<td>to</td>
+							<td>string</td>
+							<td>The language code of the target text.</td>
+							<td><code>zh-CN</code></td>
+						</tr>
+						<tr>
+							<td>lite</td>
+							<td>boolean</td>
+							<td>
+								If true, only return <code>result</code> for the translated
+								text.
+							</td>
+							<td><code>false</code></td>
+						</tr>
+					</tbody>
+				</table>
 
-        <blockquote>
-          The language code is in ISO-639-1 format. See all available code
-          listed
-          <a
-            href="https://cloud.google.com/translate/docs/languages"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            here</a
-          >.
-        </blockquote>
+				<blockquote>
+					The language code is in ISO-639-1 format. See all available code
+					listed
+					<a
+						href="https://cloud.google.com/translate/docs/languages"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						here</a
+					>.
+				</blockquote>
 
-        <h2>Example Response</h2>
-        <pre
-          style="height: 24rem"
-        ><code class="language-json" id="example-response">Loading</code></pre>
+				<h2>Example Response</h2>
+				<pre
+					style="height: 24rem"
+				><code class="language-json" id="example-response">Loading</code></pre>
 
-        <h2>Disclaimer</h2>
+				<h2>Disclaimer</h2>
 
-        <ul>
-          <li>
-            This service is not provided by the official Google Translate. It is
-            provided as a service to the public for
-            <strong>educational purposes only</strong>.
-          </li>
-          <li>
-            This service has no guarantee that the translation will be accurate.
-            The service is not responsible for any errors or omissions. The
-            service is provided <strong>as is</strong> and
-            <strong>without warranty</strong>.
-          </li>
-          <li>
-            You can also self-host this service. See the source code below.
-          </li>
-        </ul>
+				<ul>
+					<li>
+						This service is not provided by the official Google Translate. It is
+						provided as a service to the public for
+						<strong>educational purposes only</strong>.
+					</li>
+					<li>
+						This service has no guarantee that the translation will be accurate.
+						The service is not responsible for any errors or omissions. The
+						service is provided <strong>as is</strong> and
+						<strong>without warranty</strong>.
+					</li>
+					<li>
+						You can also self-host this service. See the source code below.
+					</li>
+				</ul>
 
-        <h2>Source Code</h2>
-        <p>
-          GitHub:
-          <a href="https://github.com/Songkeys/Translateer">
-            Songkeys/Translateer
-          </a>
-        </p>
-      </article>
+				<h2>Source Code</h2>
+				<p>
+					GitHub:
+					<a href="https://github.com/Songkeys/Translateer">
+						Songkeys/Translateer
+					</a>
+				</p>
+			</article>
 
-      <script src="https://unpkg.com/@highlightjs/cdn-assets@11.3.1/highlight.min.js"></script>
-      <script>
-        const entry = location.origin;
-        document.getElementById(
-          "usage-code"
-        ).innerText = `$ curl '${entry}/api?text=hello&from=en&to=zh-CN'`;
+			<script src="https://unpkg.com/@highlightjs/cdn-assets@11.3.1/highlight.min.js"></script>
+			<script>
+				const entry = location.origin;
+				document.getElementById(
+					"usage-code"
+				).innerText = `$ curl '${entry}/api?text=hello&from=en&to=zh-CN'`;
 
-        fetch("api?text=do")
-          .then((res) => res.json())
-          .then((res) => {
-            document.getElementById("example-response").innerHTML =
-              `// ${entry}/api?text=do\n` + JSON.stringify(res, null, 2);
-            hljs.highlightAll();
-          });
-      </script>
-    </div>
+				fetch("api?text=do")
+					.then((res) => res.json())
+					.then((res) => {
+						document.getElementById("example-response").innerHTML =
+							`// ${entry}/api?text=do\n` + JSON.stringify(res, null, 2);
+						hljs.highlightAll();
+					});
+			</script>
+		</div>
 
-    <footer>
-      <div class="flex justify-center my-10">
-        <p class="text-gray-500 text-sm">
-          Made by <a href="https://song.work">Songkeys</a> @ 2021
-        </p>
-      </div>
-    </footer>
-  </body>
+		<footer>
+			<div class="flex justify-center my-10">
+				<p class="text-gray-500 text-sm">
+					Made by <a href="https://song.work">Songkeys</a> @ 2021
+				</p>
+			</div>
+		</footer>
+	</body>
 </html>

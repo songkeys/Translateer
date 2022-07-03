@@ -1,27 +1,27 @@
 {
-  "name": "translateer",
-  "version": "2.0.0",
-  "description": "",
-  "main": "dist/app.js",
-  "scripts": {
-    "dev": "ts-node src/app.ts",
-    "debug": "DEBUG=true npm run dev",
-    "prod": "node dist/app.js",
-    "build": "rm -rf dist && tsc && cp -R src/public dist/public",
-    "bootstrap": "npm i && npm run build && npm run prod"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^16.11.6",
-    "ts-node": "^10.7.0",
-    "typescript": "^4.6.3"
-  },
-  "dependencies": {
-    "fastify": "^3.28.0",
-    "fastify-static": "^4.6.1",
-    "puppeteer": "^13.5.2",
-    "puppeteer-extra": "^3.2.3",
-    "puppeteer-extra-plugin-stealth": "^2.9.0"
-  }
+	"name": "translateer",
+	"version": "2.0.0",
+	"description": "",
+	"main": "dist/app.js",
+	"scripts": {
+		"dev": "ts-node src/app.ts",
+		"debug": "DEBUG=true npm run dev",
+		"prod": "node dist/app.js",
+		"build": "rm -rf dist && tsc && cp -R src/public dist/public",
+		"bootstrap": "npm i && npm run build && npm run prod"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/node": "^16.11.6",
+		"ts-node": "^10.7.0",
+		"typescript": "^4.6.3"
+	},
+	"dependencies": {
+		"fastify": "^3.28.0",
+		"fastify-static": "^4.6.1",
+		"puppeteer": "^13.5.2",
+		"puppeteer-extra": "^3.2.3",
+		"puppeteer-extra-plugin-stealth": "^2.9.0"
+	}
 }
