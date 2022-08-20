@@ -63,7 +63,8 @@ export const parsePage = async (
 	await page.type(textareaSelector, " ");
 
 	// translating...
-	const targetSelector = `span[data-language-for-alternatives=${to}]`;
+	// const targetSelector = `span[data-language-for-alternatives=${to}]`;
+	const targetSelector = `div[data-language=${to}] span`;
 	await page.waitForSelector(targetSelector);
 
 	// get translated text
