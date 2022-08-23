@@ -64,7 +64,7 @@ export const parsePage = async (
 
 	// translating...
 	// const targetSelector = `span[data-language-for-alternatives=${to}]`;
-	const targetSelector = `div[data-language=${to}] span`;
+	const targetSelector = `div[aria-live=polite] span`;
 	await page.waitForSelector(targetSelector);
 
 	// get translated text
