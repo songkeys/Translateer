@@ -55,26 +55,26 @@ export default ((fastify, opts, done) => {
 					examples: res.examples,
 					translations: res.translations,
 				};
+
+				Object.keys(response).forEach((key) => {
+					if (
+						response[key] === undefined ||
+						(typeof response[key] === "object" &&
+							Object.keys(response[key]).length === 0) ||
+						(Array.isArray(response[key]) && response[key].length === 0)
+					)
+						delete response[key];
+				});
+
+				reply
+					.code(200)
+					.header("Content-Type", "application/json; charset=utf-8")
+					.send(response);
 			} catch (e) {
 				throw e;
 			} finally {
 				pagePool.releasePage(page);
 			}
-
-			Object.keys(response).forEach((key) => {
-				if (
-					response[key] === undefined ||
-					(typeof response[key] === "object" &&
-						Object.keys(response[key]).length === 0) ||
-					(Array.isArray(response[key]) && response[key].length === 0)
-				)
-					delete response[key];
-			});
-
-			reply
-				.code(200)
-				.header("Content-Type", "application/json; charset=utf-8")
-				.send(response);
 		}
 	);
 

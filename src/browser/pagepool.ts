@@ -42,6 +42,7 @@ export default class PagePool {
 					location.reload();
 				});
 			});
+			this._pagesInUse = [];
 		}, ONE_HOUR);
 	}
 
