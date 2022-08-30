@@ -37,12 +37,14 @@ export default class PagePool {
 		// refresh pages every 1 hour to keep alive
 		const ONE_HOUR = 60 * 60 * 1000;
 		setInterval(() => {
+			this._pagesInUse.forEach((page) => {
+				this.releasePage(page);
+			});
 			this._pages.forEach((p) => {
 				p.evaluate(() => {
 					location.reload();
 				});
 			});
-			this._pagesInUse = [];
 		}, ONE_HOUR);
 	}
 
