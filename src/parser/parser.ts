@@ -40,17 +40,52 @@ export const parsePage = async (
 		(btn as HTMLButtonElement).click()
 	);
 
-	// switch source language
-	await page.evaluate((fromSelector) => {
-		const from = document.querySelectorAll<HTMLElement>(fromSelector)[0];
-		from.click();
-	}, `c-wiz[data-node-index='2;0'] div[data-language-code='${from}']`);
+	// switch source and target language
+	await page.evaluate(
+		(fromSelector, toSelector) => {
+			const fromLangs = Array.from(
+				document.querySelectorAll<HTMLElement>(fromSelector)
+			);
+			const toLangs = Array.from(
+				document.querySelectorAll<HTMLElement>(toSelector)
+			);
+			let from = fromLangs[0]!;
+			let to = toLangs[0]!;
+			if (
+				(from.parentElement?.firstChild as HTMLElement)?.innerText ===
+				"Recent languages"
+			) {
+				// if recent languages are shown, select the all language
+				from = fromLangs[1]!;
+			}
 
-	// switch target language
-	await page.evaluate((toSelector) => {
-		const to = document.querySelectorAll<HTMLElement>(toSelector)[1];
-		to.click();
-	}, `c-wiz[data-node-index='2;0'] div[data-language-code='${to}']`);
+			if (
+				(to.parentElement?.firstChild as HTMLElement)?.innerText ===
+				"Recent languages"
+			) {
+				// from has recent languages
+				to = toLangs[2]!;
+			}
+			if (
+				(to.parentElement?.firstChild as HTMLElement)?.innerText ===
+				"Recent languages"
+			) {
+				// to has recent languages
+				to = toLangs[3]!;
+			}
+
+			if (from.getAttribute("aria-selected") !== "true") {
+				from.click();
+			}
+			if (to.getAttribute("aria-selected") !== "true") {
+				to.click();
+			}
+		},
+		from === "auto"
+			? `button[data-language-code='auto']`
+			: `div[data-language-code='${from}']`,
+		`div[data-language-code='${to}']`
+	);
 
 	// type text
 	const textareaSelector = "textarea[aria-label='Source text']";

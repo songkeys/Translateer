@@ -11,7 +11,10 @@ const { PUPPETEER_WS_ENDPOINT, PAGE_COUNT = "5", PORT = 8999 } = process.env;
 
 	const browser = PUPPETEER_WS_ENDPOINT
 		? await puppeteer.connect({ browserWSEndpoint: PUPPETEER_WS_ENDPOINT })
-		: await puppeteer.launch({ headless: process.env.DEBUG !== "true" });
+		: await puppeteer.launch({
+				ignoreHTTPSErrors: true,
+				headless: process.env.DEBUG !== "true",
+		  });
 
 	console.log("connected");
 
