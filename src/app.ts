@@ -4,7 +4,7 @@ import puppeteer from "./browser/puppeteer";
 
 const fastify = Fastify({ logger: true });
 
-const { PUPPETEER_WS_ENDPOINT, PAGE_COUNT = "5", PORT = 8999 } = process.env;
+const { PUPPETEER_WS_ENDPOINT, PAGE_COUNT = "5", PORT = "8999" } = process.env;
 
 (async () => {
 	console.log("connecting to puppeteer...");
@@ -27,7 +27,10 @@ const { PUPPETEER_WS_ENDPOINT, PAGE_COUNT = "5", PORT = 8999 } = process.env;
 	fastify.register(require("./routers/index").default, { prefix: "/" });
 
 	try {
-		await fastify.listen(PORT, "0.0.0.0");
+		await fastify.listen({
+			port: Number(PORT),
+			host: "0.0.0.0",
+		});
 	} catch (err) {
 		fastify.log.error(err);
 		process.exit(1);

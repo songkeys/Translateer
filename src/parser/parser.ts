@@ -49,29 +49,44 @@ export const parsePage = async (
 			const toLangs = Array.from(
 				document.querySelectorAll<HTMLElement>(toSelector)
 			);
+
+			const isInRecentScope = (el: HTMLElement) =>
+				(el.parentElement?.firstChild as HTMLElement)?.innerText ===
+				"Recent languages";
+
+			// (all)?   (all)?   ?   ?
+			// from
+			// (all)?   (all)?   ?   ?
+			//          to
 			let from = fromLangs[0]!;
 			let to = toLangs[0]!;
-			if (
-				(from.parentElement?.firstChild as HTMLElement)?.innerText ===
-				"Recent languages"
-			) {
-				// if recent languages are shown, select the all language
+
+			// check from
+			if (isInRecentScope(from)) {
+				// recent all
+				//        from
 				from = fromLangs[1]!;
 			}
 
-			if (
-				(to.parentElement?.firstChild as HTMLElement)?.innerText ===
-				"Recent languages"
-			) {
-				// from has recent languages
+			// check to
+			if (isInRecentScope(to)) {
+				// recent all  ?   ?
+				//             to
 				to = toLangs[2]!;
-			}
-			if (
-				(to.parentElement?.firstChild as HTMLElement)?.innerText ===
-				"Recent languages"
-			) {
-				// to has recent languages
-				to = toLangs[3]!;
+				if (isInRecentScope(to)) {
+					// recent all recent all
+					//                   to
+					to = toLangs[3]!;
+				}
+			} else {
+				// all ?   ?   ?
+				//     to
+				to = toLangs[1]!;
+				if (isInRecentScope(to)) {
+					// all recent all \
+					//            to
+					to = toLangs[2]!;
+				}
 			}
 
 			if (from.getAttribute("aria-selected") !== "true") {
@@ -176,21 +191,18 @@ export const parsePage = async (
 
 	const examples = lite
 		? undefined
-		: await page.evaluate<(hasDidYouMean: boolean) => IExamples>(
-				(hasDidYouMean) => {
-					const egBlocks = Array.from(document.querySelectorAll("html-blob"));
-					if (hasDidYouMean) {
-						egBlocks.shift();
-					}
-					return egBlocks.map((blob) => blob.textContent!);
-				},
-				fromDidYouMean !== undefined
-		  );
+		: await page.evaluate((hasDidYouMean) => {
+				const egBlocks = Array.from(document.querySelectorAll("html-blob"));
+				if (hasDidYouMean) {
+					egBlocks.shift();
+				}
+				return egBlocks.map((blob) => blob.textContent!) as IExamples;
+		  }, fromDidYouMean !== undefined);
 
 	// get definitions
 	const definitions = lite
 		? undefined
-		: await page.evaluate<() => IDefinitions>(() => {
+		: await page.evaluate(() => {
 				const ret: IDefinitions = {};
 
 				if (
@@ -308,7 +320,7 @@ export const parsePage = async (
 
 	const translations = lite
 		? undefined
-		: await page.evaluate<() => ITranslations>(() => {
+		: await page.evaluate(() => {
 				const ret: ITranslations = {};
 				Array.from(
 					document.querySelectorAll<HTMLElement>("table > tbody")

@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"rootDir": "./src",
 		"outDir": "./dist",
-		"target": "es5",
+		"target": "ES2015",
 		"lib": ["es2015", "es2016", "es2017", "dom"],
 		"module": "commonjs",
 		"moduleResolution": "node",
