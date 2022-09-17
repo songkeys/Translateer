@@ -29,6 +29,17 @@ export default class PagePool {
 					await page.goto("https://translate.google.com/", {
 						waitUntil: "networkidle2",
 					});
+					// privacy consent
+					try {
+						const btnSelector = 'button[aria-label="Reject all"]';
+						await page.waitForSelector(btnSelector, { timeout: 1000 });
+						await page.$eval(btnSelector, (btn) => {
+							(btn as HTMLButtonElement).click();
+						});
+						console.log("rejected privacy consent");
+					} catch {
+						console.log("no privacy consent");
+					}
 					return page;
 				})
 			)
