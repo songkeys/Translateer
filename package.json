@@ -8,7 +8,7 @@
 		"debug": "DEBUG=true npm run dev",
 		"prod": "node dist/app.js",
 		"build": "rm -rf dist && tsc && cp -R src/public dist/public",
-		"bootstrap": "npm i && npm run build && npm run prod"
+		"bootstrap": "npm ci && npm run build && npm run prod"
 	},
 	"author": "",
 	"license": "ISC",
