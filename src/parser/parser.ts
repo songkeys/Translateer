@@ -127,11 +127,11 @@ export const parsePage = async (
 	);
 
 	// get from
-	const fromISO = await page.evaluate(() =>
-		document
-			.querySelector<HTMLElement>("div[data-original-language]")!
-			.getAttribute("data-original-language")
-	);
+	// const fromISO = await page.evaluate(() =>
+	// 	document
+	// 		.querySelector<HTMLElement>("div[data-original-language]")!
+	// 		.getAttribute("data-original-language")
+	// );
 
 	// get did you mean
 	const fromDidYouMean = await page.evaluate(() => {
@@ -354,7 +354,7 @@ export const parsePage = async (
 
 	return {
 		result,
-		fromISO,
+		// fromISO,
 		fromDidYouMean,
 		fromSuggestions,
 		fromPronunciation,
