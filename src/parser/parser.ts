@@ -113,18 +113,66 @@ export const parsePage = async (
 	await page.type(textareaSelector, " ");
 
 	// translating...
-	// const targetSelector = `span[data-language-for-alternatives=${to}]`;
-	const targetSelector = `div[aria-live=polite] span`;
-	await page.waitForSelector(targetSelector);
+	let result = "";
+	let pronunciation = "";
+	do {
+		// const targetSelector = `span[data-language-for-alternatives=${to}]`;
+		const targetSelector = `div[aria-live=polite] span`;
+		await page.waitForSelector(targetSelector);
 
-	// get translated text
-	const result = await page.evaluate(
-		(targetSelector) =>
-			document
-				.querySelector<HTMLElement>(targetSelector)!
-				.parentElement!.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, ""), // remove zero-width space
-		targetSelector
-	);
+		// get translated text
+		result += await page.evaluate(
+			(targetSelector) =>
+				document
+					.querySelector<HTMLElement>(targetSelector)!
+					.parentElement!.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, ""), // remove zero-width space
+			targetSelector
+		);
+
+		// get pronunciation
+		pronunciation += await page.evaluate(
+			() =>
+				document
+					.querySelector<HTMLElement>('div[data-location="2"] > div')!
+					.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, "") || undefined
+		);
+
+		// get next page
+		const shouldContinue = await page.evaluate(() => {
+			const next = document.querySelector('button[aria-label="Next"]');
+			const pseudoNext = getComputedStyle(
+				document.querySelector('button[aria-label="Next"] > div')!,
+				"::before"
+			);
+			const hasNext =
+				next && pseudoNext.width.endsWith("px") && pseudoNext.width !== "0px";
+			const isLastPage = next?.hasAttribute("disabled");
+			const shouldContinue = Boolean(hasNext && !isLastPage);
+			return shouldContinue;
+		});
+
+		if (shouldContinue) {
+			// await network idle first
+			const xhr = page.waitForResponse((r) => {
+				return r
+					.url()
+					.startsWith(
+						"https://translate.google.com/_/TranslateWebserverUi/data/batchexecute"
+					);
+			});
+
+			await page.evaluate(() => {
+				const next = document.querySelector<HTMLButtonElement>(
+					'button[aria-label="Next"]'
+				)!;
+				next.click();
+			});
+
+			await xhr;
+		} else {
+			break;
+		}
+	} while (true);
 
 	// get from
 	// const fromISO = await page.evaluate(() =>
@@ -173,14 +221,6 @@ export const parsePage = async (
 		() =>
 			document
 				.querySelector<HTMLElement>('div[data-location="1"] > div')!
-				.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, "") || undefined
-	);
-
-	// get pronunciation
-	const pronunciation = await page.evaluate(
-		() =>
-			document
-				.querySelector<HTMLElement>('div[data-location="2"] > div')!
 				.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, "") || undefined
 	);
 
@@ -279,13 +319,16 @@ export const parsePage = async (
 							// there may be an example
 							try {
 								const hasExample =
-									blocks.length > 0 && blocks[0].children[0].tagName === "Q";
+									blocks.length > 0 && blocks[0].children[0]?.tagName === "Q";
 								if (hasExample) {
 									def.example = blocks[0].children[0].textContent!;
 									blocks.shift();
 								}
-							} catch {
-								throw JSON.stringify(def);
+							} catch (e: any) {
+								throw new Error(
+									`Failed parsing definition's example: ${e.message}. ` +
+										JSON.stringify(def)
+								);
 							}
 
 							// there may be synonyms
