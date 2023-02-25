@@ -1,19 +1,59 @@
-import type { Browser, Page } from "puppeteer";
+import { Browser, executablePath, Page } from "puppeteer";
+import puppeteer from "./puppeteer";
+
+const { PUPPETEER_WS_ENDPOINT } = process.env;
 
 export let pagePool: PagePool;
 
 export default class PagePool {
 	private _pages: Page[] = [];
 	private _pagesInUse: Page[] = [];
+	private _browser!: Browser;
 
-	constructor(private browser: Browser, private pageCount: number = 5) {
+	constructor(private pageCount: number = 5) {
 		pagePool = this;
 	}
 
 	public async init() {
+		await this._initBrowser();
+		await this._initPages();
+
+		// refresh pages every 1 hour to keep alive
+		this._resetInterval(60 * 60 * 1000);
+	}
+
+	public getPage() {
+		const page = this._pages.pop();
+		if (!page) {
+			return undefined;
+		}
+		this._pagesInUse.push(page);
+		return page;
+	}
+
+	public releasePage(page: Page) {
+		const index = this._pagesInUse.indexOf(page);
+		if (index === -1) {
+			return;
+		}
+		this._pagesInUse.splice(index, 1);
+		this._pages.push(page);
+	}
+
+	private async _initBrowser() {
+		this._browser = PUPPETEER_WS_ENDPOINT
+			? await puppeteer.connect({ browserWSEndpoint: PUPPETEER_WS_ENDPOINT })
+			: await puppeteer.launch({
+					ignoreHTTPSErrors: true,
+					headless: process.env.DEBUG !== "true",
+					executablePath: executablePath(),
+			  });
+	}
+
+	private async _initPages() {
 		this._pages = await Promise.all(
 			[...Array(this.pageCount)].map(() =>
-				this.browser.newPage().then(async (page) => {
+				this._browser.newPage().then(async (page) => {
 					await page.setRequestInterception(true);
 					page.on("request", (req) => {
 						if (
@@ -44,36 +84,15 @@ export default class PagePool {
 				})
 			)
 		);
-
-		// refresh pages every 1 hour to keep alive
-		const ONE_HOUR = 60 * 60 * 1000;
-		setInterval(() => {
-			this._pagesInUse.forEach((page) => {
-				this.releasePage(page);
-			});
-			this._pages.forEach((p) => {
-				p.evaluate(() => {
-					location.reload();
-				});
-			});
-		}, ONE_HOUR);
 	}
 
-	public getPage() {
-		const page = this._pages.pop();
-		if (!page) {
-			return undefined;
-		}
-		this._pagesInUse.push(page);
-		return page;
-	}
-
-	public releasePage(page: Page) {
-		const index = this._pagesInUse.indexOf(page);
-		if (index === -1) {
-			return;
-		}
-		this._pagesInUse.splice(index, 1);
-		this._pages.push(page);
+	private _resetInterval(ms: number) {
+		setInterval(async () => {
+			this._pagesInUse = [];
+			this._pages = [];
+			this._browser.close();
+			await this._initBrowser();
+			await this._initPages();
+		}, ms);
 	}
 }
