@@ -17,6 +17,17 @@ const handler = async (request: any, reply: any) => {
 	};
 	const { text, from = "auto", to = "zh-CN", lite = false } = options;
 
+	if (!text) {
+		reply
+			.code(400)
+			.header("Content-Type", "application/json; charset=utf-8")
+			.send({
+				error: 1,
+				message: "text is required",
+			});
+		return;
+	}
+
 	const page = pagePool.getPage();
 	if (!page) {
 		reply

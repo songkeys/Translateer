@@ -125,7 +125,7 @@ export const parsePage = async (
 			(targetSelector) =>
 				document
 					.querySelector<HTMLElement>(targetSelector)!
-					.parentElement!.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, ""), // remove zero-width space
+					.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, ""), // remove zero-width space
 			targetSelector
 		);
 
