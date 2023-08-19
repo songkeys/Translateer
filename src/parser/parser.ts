@@ -117,7 +117,7 @@ export const parsePage = async (
 	let pronunciation = "";
 	do {
 		// const targetSelector = `span[data-language-for-alternatives=${to}]`;
-		const targetSelector = `div[aria-live=polite] span`;
+		const targetSelector = `span[lang=${to}]`;
 		await page.waitForSelector(targetSelector);
 
 		// get translated text
