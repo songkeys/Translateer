@@ -15,7 +15,18 @@ const handler = async (request: any, reply: any) => {
 		...request.query,
 		...request.body,
 	};
-	const { text, from = "auto", to = "zh-CN", lite = false } = options;
+	const { token, text, from = "auto", to = "es", lite = false } = options;
+
+	if (!token || token !== process.env.TOKEN) {
+		reply
+			.code(400)
+			.header("Content-Type", "application/json; charset=utf-8")
+			.send({
+				error: 1,
+				message: "token is required",
+			});
+		return;
+	}
 
 	if (!text) {
 		reply
@@ -87,6 +98,7 @@ export default ((fastify, opts, done) => {
 		url: "/",
 		schema: {
 			querystring: {
+				token: { type: "string" },
 				text: { type: "string" },
 				from: { type: "string" },
 				to: { type: "string" },
@@ -103,6 +115,7 @@ export default ((fastify, opts, done) => {
 		url: "/",
 		schema: {
 			body: {
+				token: { type: "string" },
 				text: { type: "string" },
 				from: { type: "string" },
 				to: { type: "string" },
