@@ -48,11 +48,13 @@ export default class PagePool {
 					headless: process.env.DEBUG !== "true" ? "new" : false,
 					executablePath: executablePath(),
 			  });
+		console.log("browser launched");
 	}
 
 	private async _initPages() {
+		let created = 0;
 		this._pages = await Promise.all(
-			[...Array(this.pageCount)].map(() =>
+			[...Array(this.pageCount)].map((_, i) =>
 				this._browser.newPage().then(async (page) => {
 					await page.setRequestInterception(true);
 					page.on("request", (req) => {
@@ -66,9 +68,11 @@ export default class PagePool {
 							req.continue();
 						}
 					});
+					console.log(`page ${i} created`);
 					await page.goto("https://translate.google.com/details", {
 						waitUntil: "networkidle2",
 					});
+					console.log(`page ${i} loaded`);
 					// privacy consent
 					try {
 						const btnSelector = 'button[aria-label="Reject all"]';
@@ -76,10 +80,12 @@ export default class PagePool {
 						await page.$eval(btnSelector, (btn) => {
 							(btn as HTMLButtonElement).click();
 						});
-						console.log("rejected privacy consent");
+						console.log(`page ${i} privacy consent rejected`);
 					} catch {
-						console.log("no privacy consent");
+						console.log(`page ${i} privacy consent not found`);
 					}
+					created++;
+					console.log(`page ${i} ready (${created}/${this.pageCount})`);
 					return page;
 				})
 			)
