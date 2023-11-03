@@ -45,7 +45,7 @@ export default class PagePool {
 			? await puppeteer.connect({ browserWSEndpoint: PUPPETEER_WS_ENDPOINT })
 			: await puppeteer.launch({
 					ignoreHTTPSErrors: true,
-					headless: process.env.DEBUG !== "true",
+					headless: process.env.DEBUG !== "true" ? "new" : false,
 					executablePath: executablePath(),
 			  });
 	}
@@ -66,7 +66,7 @@ export default class PagePool {
 							req.continue();
 						}
 					});
-					await page.goto("https://translate.google.com/", {
+					await page.goto("https://translate.google.com/details", {
 						waitUntil: "networkidle2",
 					});
 					// privacy consent

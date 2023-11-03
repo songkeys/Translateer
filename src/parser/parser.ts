@@ -229,16 +229,6 @@ export const parsePage = async (
 		await page.waitForSelector("html-blob", { timeout: 100 });
 	} catch {}
 
-	const examples = lite
-		? undefined
-		: await page.evaluate((hasDidYouMean) => {
-				const egBlocks = Array.from(document.querySelectorAll("html-blob"));
-				if (hasDidYouMean) {
-					egBlocks.shift();
-				}
-				return egBlocks.map((blob) => blob.textContent!) as IExamples;
-		  }, fromDidYouMean !== undefined);
-
 	// get definitions
 	const definitions = lite
 		? undefined
@@ -248,7 +238,7 @@ export const parsePage = async (
 				if (
 					!document
 						.querySelector<HTMLElement>(
-							"c-wiz > div > div > c-wiz > div > c-wiz > div > c-wiz > div > div > div > div:nth-child(1) > div > div"
+							"c-wiz > div > div > c-wiz > div > c-wiz > div > div:nth-child(3) > div > div > div"
 						)
 						?.innerText.includes("Definitions of")
 				) {
@@ -257,10 +247,11 @@ export const parsePage = async (
 
 				const definitionalBlocks = Array.from(
 					document.querySelectorAll<HTMLElement>(
-						"c-wiz > div > div > c-wiz > div > c-wiz > div > c-wiz > div > div > div > div:nth-child(1) > div > div > div"
+						"c-wiz > div > div > c-wiz > div > c-wiz > div > div:nth-child(3) > div > div > div > div"
 					)
 				);
 
+				let blockClassName = undefined;
 				for (
 					let i = 0,
 						currentPos = "unknown",
@@ -274,6 +265,11 @@ export const parsePage = async (
 						? definitionalBlocks[i].children[0]
 						: definitionalBlocks[i];
 
+					const isButtonBlock = block.children[0].tagName === "BUTTON"; // Show all button
+					if (isButtonBlock) {
+						continue;
+					}
+
 					const isPosBlock = block.children[0].childElementCount === 0; // a text block
 					if (isPosBlock) {
 						currentPos = block.children[0].textContent!.toLowerCase();
@@ -285,6 +281,11 @@ export const parsePage = async (
 					} else {
 						// parse definition block
 						let def: IDefinitions[string][number] = { definition: "" };
+						if (!blockClassName) {
+							blockClassName = block.className;
+						} else if (block.className !== blockClassName) {
+							continue;
+						}
 						const leftBlock = block.children[0]; // its children should be number or nothing
 						const rightBlock = block.children[1]; // its children should be the definition div or label div
 						const isRightBlockLabel = leftBlock.childElementCount === 0;
@@ -361,6 +362,17 @@ export const parsePage = async (
 				return ret;
 		  });
 
+	const examples = lite
+		? undefined
+		: await page.evaluate((from) => {
+				const egBlocks = Array.from(
+					document.querySelectorAll(
+						`c-wiz > div > div > c-wiz > div > c-wiz > div > div > div > div:nth-child(2) > div > div div[lang=${from}]`
+					)
+				);
+				return egBlocks.map((el) => el.textContent!) as IExamples;
+		  }, from);
+
 	const translations = lite
 		? undefined
 		: await page.evaluate(() => {
@@ -370,7 +382,7 @@ export const parsePage = async (
 				).forEach((tbody) => {
 					const [tr0, ...trs] = Array.from(tbody.children);
 					const [th0, ...tds] = Array.from(tr0.children);
-					const PoS = th0.textContent!;
+					const PoS = th0.textContent!.toLowerCase();
 					if (PoS === "") return;
 					trs.push({ children: tds } as unknown as Element);
 					ret[PoS] = trs.map(({ children }) => {
