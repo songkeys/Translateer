@@ -12,7 +12,13 @@ const { PAGE_COUNT = "5", PORT = "8999" } = process.env;
 
 	console.log("initializing pages...");
 
-	await new PagePool(parseInt(PAGE_COUNT, 10)).init();
+	try {
+		await new PagePool(parseInt(PAGE_COUNT, 10)).init();
+	} catch (e) {
+		console.log("Failed to initialize pages");
+		console.error(e);
+		process.exit(1);
+	}
 
 	console.log("ready");
 
