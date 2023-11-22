@@ -224,188 +224,199 @@ export const parsePage = async (
 				.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, "") || undefined
 	);
 
+	const noDetails = await page.evaluate(() => {
+		return document
+			.querySelector<HTMLDivElement>("c-wiz[role='complementary'] > div > div")
+			?.innerText?.startsWith("No details found for");
+	});
+
 	// get examples
 	try {
 		await page.waitForSelector("html-blob", { timeout: 100 });
 	} catch {}
 
 	// get definitions
-	const definitions = lite
-		? undefined
-		: await page.evaluate(() => {
-				const ret: IDefinitions = {};
+	const definitions =
+		lite || noDetails
+			? undefined
+			: await page.evaluate(() => {
+					const ret: IDefinitions = {};
 
-				if (
-					!document
-						.querySelector<HTMLElement>(
-							"c-wiz > div > div > c-wiz > div > c-wiz > div > div:nth-child(3) > div > div > div"
-						)
-						?.innerText.includes("Definitions of")
-				) {
-					return ret;
-				}
-
-				const definitionalBlocks = Array.from(
-					document.querySelectorAll<HTMLElement>(
-						"c-wiz > div > div > c-wiz > div > c-wiz > div > div:nth-child(3) > div > div > div > div"
-					)
-				);
-
-				let blockClassName = undefined;
-				for (
-					let i = 0,
-						currentPos = "unknown",
-						currentLabels: string[] | undefined;
-					i < definitionalBlocks.length;
-					++i
-				) {
-					const isHiddenBlock =
-						definitionalBlocks[i].getAttribute("role") === "presentation";
-					const block = isHiddenBlock
-						? definitionalBlocks[i].children[0]
-						: definitionalBlocks[i];
-
-					const isButtonBlock = block.children[0].tagName === "BUTTON"; // Show all button
-					if (isButtonBlock) {
-						continue;
-					}
-
-					const isPosBlock = block.children[0].childElementCount === 0; // a text block
-					if (isPosBlock) {
-						currentPos = block.children[0].textContent!.toLowerCase();
-						if (currentPos.includes("expand")) {
-							continue;
-						}
-						ret[currentPos] = [];
-						currentLabels = undefined; // reset labels
-					} else {
-						// parse definition block
-						let def: IDefinitions[string][number] = { definition: "" };
-						if (!blockClassName) {
-							blockClassName = block.className;
-						} else if (block.className !== blockClassName) {
-							continue;
-						}
-						const leftBlock = block.children[0]; // its children should be number or nothing
-						const rightBlock = block.children[1]; // its children should be the definition div or label div
-						const isRightBlockLabel = leftBlock.childElementCount === 0;
-						if (isRightBlockLabel) {
-							currentLabels = [rightBlock.textContent!.toLowerCase()]; // this label should be the following blocks' labels
-							continue;
-						} else {
-							// definition block
-
-							// check the previous labels first
-							if (currentLabels) {
-								def.labels = currentLabels;
-							}
-
-							const blocks = Array.from(rightBlock.children);
-
-							// the leading block could be (local) labels
-							const hasLabels = blocks[0].childElementCount >= 1;
-							if (hasLabels) {
-								def.labels = Array.from(blocks[0].children).map(
-									(b) => b.textContent!
-								);
-								blocks.shift();
-							}
-
-							// there must be a definition
-							def.definition = blocks[0].textContent!;
-							blocks.shift();
-
-							// there may be some blocks after the definition
-
-							// there may be an example
-							try {
-								const hasExample =
-									blocks.length > 0 && blocks[0].children[0]?.tagName === "Q";
-								if (hasExample) {
-									def.example = blocks[0].children[0].textContent!;
-									blocks.shift();
-								}
-							} catch (e: any) {
-								throw new Error(
-									`Failed parsing definition's example: ${e.message}. ` +
-										JSON.stringify(def)
-								);
-							}
-
-							// there may be synonyms
-							const hasSynonyms =
-								blocks.length > 0 && blocks[0].textContent === "Synonyms:";
-							if (hasSynonyms) {
-								blocks.shift();
-								def.synonyms = {};
-								while (blocks.length > 0) {
-									const words = Array.from(blocks[0].children);
-									const hasType = words[0].textContent!.includes(":");
-									const type = hasType
-										? words[0].textContent!.split(":")[0]
-										: "common";
-									if (hasType) {
-										words.shift();
-									}
-									def.synonyms[type] = words.map((w) => w.textContent!.trim());
-									blocks.shift();
-								}
-							}
-
-							ret[currentPos].push(def);
-
-							// definition block end
-						}
-					}
-				}
-
-				return ret;
-		  });
-
-	const examples = lite
-		? undefined
-		: await page.evaluate((from) => {
-				const egBlocks = Array.from(
-					document.querySelectorAll(
-						`c-wiz > div > div > c-wiz > div > c-wiz > div > div > div > div:nth-child(2) > div > div div[lang=${from}]`
-					)
-				);
-				return egBlocks.map((el) => el.textContent!) as IExamples;
-		  }, from);
-
-	const translations = lite
-		? undefined
-		: await page.evaluate(() => {
-				const ret: ITranslations = {};
-				Array.from(
-					document.querySelectorAll<HTMLElement>("table > tbody")
-				).forEach((tbody) => {
-					const [tr0, ...trs] = Array.from(tbody.children);
-					const [th0, ...tds] = Array.from(tr0.children);
-					const PoS = th0.textContent!.toLowerCase();
-					if (PoS === "") return;
-					trs.push({ children: tds } as unknown as Element);
-					ret[PoS] = trs.map(({ children }) => {
-						const [trans, reverseTranses, freq] = Array.from(children);
-						return {
-							translation: trans.textContent?.trim()!,
-							reversedTranslations: Array.from(
-								reverseTranses.children[0].children
+					if (
+						!document
+							.querySelector<HTMLElement>(
+								"c-wiz[role='complementary'] > div > c-wiz > div > div:nth-child(3) > div > div > div"
 							)
-								.map((c) => c.textContent!.replace(", ", "").split(", "))
-								.flat(),
-							frequency:
-								freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
-									?.getAttribute("aria-label")
-									?.toLowerCase() ??
-								freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
-									?.getAttribute("aria-label")
-									?.toLowerCase()!,
-						};
+							?.innerText.includes("Definitions of")
+					) {
+						return ret;
+					}
+
+					const definitionalBlocks = Array.from(
+						document.querySelectorAll<HTMLElement>(
+							"c-wiz[role='complementary'] > div > c-wiz > div > div:nth-child(3) > div > div > div > div"
+						)
+					);
+
+					let blockClassName = undefined;
+					for (
+						let i = 0,
+							currentPos = "unknown",
+							currentLabels: string[] | undefined;
+						i < definitionalBlocks.length;
+						++i
+					) {
+						const isHiddenBlock =
+							definitionalBlocks[i].getAttribute("role") === "presentation";
+						const block = isHiddenBlock
+							? definitionalBlocks[i].children[0]
+							: definitionalBlocks[i];
+
+						const isButtonBlock = block.children[0].tagName === "BUTTON"; // Show all button
+						if (isButtonBlock) {
+							continue;
+						}
+
+						const isPosBlock = block.children[0].childElementCount === 0; // a text block
+						if (isPosBlock) {
+							currentPos = block.children[0].textContent!.toLowerCase();
+							if (currentPos.includes("expand")) {
+								continue;
+							}
+							ret[currentPos] = [];
+							currentLabels = undefined; // reset labels
+						} else {
+							// parse definition block
+							let def: IDefinitions[string][number] = { definition: "" };
+							if (!blockClassName) {
+								blockClassName = block.className;
+							} else if (block.className !== blockClassName) {
+								continue;
+							}
+							const leftBlock = block.children[0]; // its children should be number or nothing
+							const rightBlock = block.children[1]; // its children should be the definition div or label div
+							const isRightBlockLabel = leftBlock.childElementCount === 0;
+							if (isRightBlockLabel) {
+								currentLabels = [rightBlock.textContent!.toLowerCase()]; // this label should be the following blocks' labels
+								continue;
+							} else {
+								// definition block
+
+								// check the previous labels first
+								if (currentLabels) {
+									def.labels = currentLabels;
+								}
+
+								const blocks = Array.from(rightBlock.children);
+
+								// the leading block could be (local) labels
+								const hasLabels = blocks[0].childElementCount >= 1;
+								if (hasLabels) {
+									def.labels = Array.from(blocks[0].children).map(
+										(b) => b.textContent!
+									);
+									blocks.shift();
+								}
+
+								// there must be a definition
+								def.definition = blocks[0].textContent!;
+								blocks.shift();
+
+								// there may be some blocks after the definition
+
+								// there may be an example
+								try {
+									const hasExample =
+										blocks.length > 0 && blocks[0].children[0]?.tagName === "Q";
+									if (hasExample) {
+										def.example = blocks[0].children[0].textContent!;
+										blocks.shift();
+									}
+								} catch (e: any) {
+									throw new Error(
+										`Failed parsing definition's example: ${e.message}. ` +
+											JSON.stringify(def)
+									);
+								}
+
+								// there may be synonyms
+								const hasSynonyms =
+									blocks.length > 0 && blocks[0].textContent === "Synonyms:";
+								if (hasSynonyms) {
+									blocks.shift();
+									def.synonyms = {};
+									while (blocks.length > 0) {
+										const words = Array.from(blocks[0].children);
+										const hasType = words[0].textContent!.includes(":");
+										const type = hasType
+											? words[0].textContent!.split(":")[0]
+											: "common";
+										if (hasType) {
+											words.shift();
+										}
+										def.synonyms[type] = words.map((w) =>
+											w.textContent!.trim()
+										);
+										blocks.shift();
+									}
+								}
+
+								ret[currentPos].push(def);
+
+								// definition block end
+							}
+						}
+					}
+
+					return ret;
+			  });
+
+	const examples =
+		lite || noDetails
+			? undefined
+			: await page.evaluate((from) => {
+					const egBlocks = Array.from(
+						document.querySelectorAll(
+							`c-wiz[role='complementary'] > div > c-wiz > div > div > div > div:nth-child(2) > div > div div[lang=${from}]`
+						)
+					);
+					return egBlocks.map((el) => el.textContent!) as IExamples;
+			  }, from);
+
+	const translations =
+		lite || noDetails
+			? undefined
+			: await page.evaluate(() => {
+					const ret: ITranslations = {};
+					Array.from(
+						document.querySelectorAll<HTMLElement>("table > tbody")
+					).forEach((tbody) => {
+						const [tr0, ...trs] = Array.from(tbody.children);
+						const [th0, ...tds] = Array.from(tr0.children);
+						const PoS = th0.textContent!.toLowerCase();
+						if (PoS === "") return;
+						trs.push({ children: tds } as unknown as Element);
+						ret[PoS] = trs.map(({ children }) => {
+							const [trans, reverseTranses, freq] = Array.from(children);
+							return {
+								translation: trans.textContent?.trim()!,
+								reversedTranslations: Array.from(
+									reverseTranses.children[0].children
+								)
+									.map((c) => c.textContent!.replace(", ", "").split(", "))
+									.flat(),
+								frequency:
+									freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
+										?.getAttribute("aria-label")
+										?.toLowerCase() ??
+									freq.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild
+										?.getAttribute("aria-label")
+										?.toLowerCase()!,
+							};
+						});
 					});
-				});
-				return ret;
-		  });
+					return ret;
+			  });
 
 	return {
 		result,
