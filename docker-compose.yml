@@ -9,7 +9,7 @@ services:
     ports:
       - "8999:8999"
     environment:
-      PUPPETEER_WS_ENDPOINT: "ws://browserless:3000/?--user-data-dir=./tmp/session-data"
+      PUPPETEER_WS_ENDPOINT: "ws://browserless:3000/?--user-data-dir=./tmp/translateer-data"
       PAGE_COUNT: "5"
     depends_on:
       - browserless
