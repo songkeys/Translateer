@@ -97,7 +97,7 @@ export default class PagePool {
 		setInterval(async () => {
 			this._pagesInUse = [];
 			this._pages = [];
-			this._browser.close();
+			await this._browser.close();
 			await this._initBrowser();
 			await this._initPages();
 		}, ms);
