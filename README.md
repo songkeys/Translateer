@@ -50,7 +50,7 @@ Visit <https://t.song.work/> to see more usage.
 3. Run the server
 
    ```bash
-   npm run prod
+   npm run start
    ```
 
 ### Environment Variables

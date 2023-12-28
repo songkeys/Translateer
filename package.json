@@ -7,7 +7,7 @@
 	"scripts": {
 		"dev": "ts-node src/app.ts",
 		"debug": "DEBUG=true npm run dev",
-		"prod": "node dist/app.js",
+		"start": "node dist/app.js",
 		"build": "rm -rf dist && tsc && cp -R src/public dist/public",
 		"bootstrap": "npm ci && npm run build && npm run prod"
 	},
