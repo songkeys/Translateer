@@ -6,10 +6,6 @@ const fastify = Fastify({ logger: true });
 const { PAGE_COUNT = "5", PORT = "8999" } = process.env;
 
 (async () => {
-	console.log("connecting to puppeteer...");
-
-	console.log("connected");
-
 	console.log("initializing pages...");
 
 	try {

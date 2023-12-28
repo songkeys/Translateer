@@ -48,6 +48,7 @@ export default class PagePool {
 					headless: process.env.DEBUG !== "true" ? "new" : false,
 					executablePath: executablePath(),
 					userDataDir: "./tmp/translateer-data",
+					args: ["--no-sandbox"],
 			  });
 		console.log("browser launched");
 	}
