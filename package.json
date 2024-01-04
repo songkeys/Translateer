@@ -9,7 +9,7 @@
 		"debug": "DEBUG=true npm run dev",
 		"start": "node dist/app.js",
 		"build": "rm -rf dist && tsc && cp -R src/public dist/public",
-		"bootstrap": "npm ci && npm run build && npm run prod"
+		"bootstrap": "npm ci && npm run build && npm run start"
 	},
 	"author": "Songkeys",
 	"license": "ISC",
