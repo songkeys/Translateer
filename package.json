@@ -5,7 +5,7 @@
 	"description": "",
 	"main": "dist/app.js",
 	"scripts": {
-		"dev": "ts-node src/app.ts",
+		"dev": "tsx src/app.ts",
 		"debug": "DEBUG=true npm run dev",
 		"start": "node dist/app.js",
 		"build": "rm -rf dist && tsc && cp -R src/public dist/public",
@@ -15,7 +15,7 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@types/node": "^20.10.3",
-		"ts-node": "^10.9.1",
+		"tsx": "^4.7.0",
 		"typescript": "^5.3.2"
 	},
 	"dependencies": {

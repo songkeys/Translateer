@@ -47,7 +47,7 @@ export default class PagePool {
 					ignoreHTTPSErrors: true,
 					headless: process.env.DEBUG !== "true" ? "new" : false,
 					executablePath: executablePath(),
-					userDataDir: "./tmp/translateer-data",
+					userDataDir: "/tmp/translateer-data",
 					args: ["--no-sandbox"],
 			  });
 		console.log("browser launched");
