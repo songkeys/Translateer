@@ -130,9 +130,7 @@ export const parsePage = async (
 		);
 
 		// get pronunciation
-		pronunciation += await page.evaluate(
-			() => document.querySelector<HTMLElement>('div[data-location="2"] > div')?.innerText?.replace(/[\u200B-\u200D\uFEFF]/g, "") || null
-		);
+		pronunciation += await page.evaluate(() => document.querySelector<HTMLElement>('div[data-location="2"] > div')?.innerText?.replace(/[\u200B-\u200D\uFEFF]/g, ""));
 
 		// get next page
 		const shouldContinue = await page.evaluate(() => {
@@ -214,9 +212,7 @@ export const parsePage = async (
 			  });
 
 	// get from pronunciation
-	const fromPronunciation = await page.evaluate(
-		() => document.querySelector<HTMLElement>('div[data-location="1"] > div')?.innerText?.replace(/[\u200B-\u200D\uFEFF]/g, "") || null
-	);
+	const fromPronunciation = await page.evaluate(() => document.querySelector<HTMLElement>('div[data-location="1"] > div')?.innerText?.replace(/[\u200B-\u200D\uFEFF]/g, "")) || undefined;
 
 	const noDetails = await page.evaluate(() => {
 		return document
@@ -418,7 +414,7 @@ export const parsePage = async (
 		fromDidYouMean,
 		fromSuggestions,
 		fromPronunciation,
-		pronunciation,
+		pronunciation: pronunciation || undefined,
 		examples,
 		definitions,
 		translations,
