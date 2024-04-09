@@ -117,7 +117,7 @@ export const parsePage = async (
 	let pronunciation = "";
 	do {
 		// const targetSelector = `span[data-language-for-alternatives=${to}]`;
-		const targetSelector = `.ryNqvb`;
+		const targetSelector = `span[lang=${to}] > span > span`;
 		await page.waitForSelector(targetSelector);
 
 		// get translated text
