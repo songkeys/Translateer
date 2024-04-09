@@ -130,7 +130,7 @@ export const parsePage = async (
 		);
 
 		// get pronunciation
-		pronunciation += await page.evaluate(() => document.querySelector<HTMLElement>('div[data-location="2"] > div')?.innerText?.replace(/[\u200B-\u200D\uFEFF]/g, ""));
+		pronunciation += await page.evaluate(() => document.querySelector<HTMLElement>('div[data-location="2"] > div')?.innerText?.replace(/[\u200B-\u200D\uFEFF]/g, "")) || "";
 
 		// get next page
 		const shouldContinue = await page.evaluate(() => {
