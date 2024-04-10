@@ -117,7 +117,7 @@ export const parsePage = async (
 	let pronunciation = "";
 	do {
 		// const targetSelector = `span[data-language-for-alternatives=${to}]`;
-		const targetSelector = `span[lang=${to}]`;
+		const targetSelector = `span[lang=${to}] > span > span`;
 		await page.waitForSelector(targetSelector);
 
 		// get translated text
@@ -130,12 +130,7 @@ export const parsePage = async (
 		);
 
 		// get pronunciation
-		pronunciation += await page.evaluate(
-			() =>
-				document
-					.querySelector<HTMLElement>('div[data-location="2"] > div')!
-					.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, "") || undefined
-		);
+		pronunciation += await page.evaluate(() => document.querySelector<HTMLElement>('div[data-location="2"] > div')?.innerText?.replace(/[\u200B-\u200D\uFEFF]/g, "")) || "";
 
 		// get next page
 		const shouldContinue = await page.evaluate(() => {
@@ -217,12 +212,7 @@ export const parsePage = async (
 			  });
 
 	// get from pronunciation
-	const fromPronunciation = await page.evaluate(
-		() =>
-			document
-				.querySelector<HTMLElement>('div[data-location="1"] > div')!
-				.innerText!.replace(/[\u200B-\u200D\uFEFF]/g, "") || undefined
-	);
+	const fromPronunciation = await page.evaluate(() => document.querySelector<HTMLElement>('div[data-location="1"] > div')?.innerText?.replace(/[\u200B-\u200D\uFEFF]/g, "")) || undefined;
 
 	const noDetails = await page.evaluate(() => {
 		return document
@@ -424,7 +414,7 @@ export const parsePage = async (
 		fromDidYouMean,
 		fromSuggestions,
 		fromPronunciation,
-		pronunciation,
+		pronunciation: pronunciation || undefined,
 		examples,
 		definitions,
 		translations,
