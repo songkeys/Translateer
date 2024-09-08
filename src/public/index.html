@@ -10,137 +10,163 @@
 		/>
 		<link
 			rel="stylesheet"
-			href="https://unpkg.com/tailwindcss@^1.5/dist/base.min.css"
+			href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind.min.css"
 		/>
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/tailwindcss@^1.5/dist/components.min.css"
-		/>
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/@tailwindcss/typography@0.2.x/dist/typography.min.css"
-		/>
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/tailwindcss@^1.5/dist/utilities.min.css"
-		/>
-
+		<style>
+			[un-cloak] {
+				display: none;
+			}
+			pre {
+				padding: 1rem;
+				border-radius: 0.5rem;
+				overflow: auto;
+			}
+		</style>
 		<title>Translateer - Google Translate API</title>
 	</head>
 	<body class="bg-indigo-lightest font-mono">
-		<div class="container grid max-w-4xl mx-auto p-8">
-			<article class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl">
-				<h1 class="flex items-center">
-					<img src="logo.png" class="w-16 h-16" style="margin: 0 1rem 0 0" />
-					Translateer
-				</h1>
 
-				<blockquote>A free Google Translate API using Puppeteer.</blockquote>
+		<article class="mx-auto p-2 prose text-sm md:text-base lg:text-lg xl:text-xl">
+			<h1 class="flex items-center">
+				<img src="logo.png" class="w-16 h-16" style="margin: 0 1rem 0 0" />
+				Translateer
+			</h1>
 
-				<h2>Usage</h2>
-				<pre><code class="language-bash" id="usage-code"></code></pre>
-				<h3>Parameters</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Type</th>
-							<th>Description</th>
-							<th>Default</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>text</td>
-							<td>string</td>
-							<td>The text to translate.</td>
-							<td><i>[Required]</i></td>
-						</tr>
-						<tr>
-							<td>from</td>
-							<td>string</td>
-							<td>The language code of the source text.</td>
-							<td><code>auto</code></td>
-						</tr>
-						<tr>
-							<td>to</td>
-							<td>string</td>
-							<td>The language code of the target text.</td>
-							<td><code>zh-CN</code></td>
-						</tr>
-						<tr>
-							<td>lite</td>
-							<td>boolean</td>
-							<td>
-								If true, only return <code>result</code> for the translated
-								text.
-							</td>
-							<td><code>false</code></td>
-						</tr>
-					</tbody>
-				</table>
+			<blockquote>A free Google Translate API using Puppeteer.</blockquote>
 
-				<blockquote>
-					The language code is in ISO-639-1 format. See all available code
-					listed
-					<a
-						href="https://cloud.google.com/translate/docs/languages"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						here</a
-					>.
-				</blockquote>
+			<h2>Usage</h2>
+			<div id="usage-code" class="not-prose"></div>
+			<h3>Parameters</h3>
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Type</th>
+						<th>Description</th>
+						<th>Default</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>text</td>
+						<td>string</td>
+						<td>The text to translate.</td>
+						<td><i>[Required]</i></td>
+					</tr>
+					<tr>
+						<td>from</td>
+						<td>string</td>
+						<td>The language code of the source text.</td>
+						<td><code>auto</code></td>
+					</tr>
+					<tr>
+						<td>to</td>
+						<td>string</td>
+						<td>The language code of the target text.</td>
+						<td><code>zh-CN</code></td>
+					</tr>
+					<tr>
+						<td>lite</td>
+						<td>boolean</td>
+						<td>
+							If true, only return <code>result</code> for the translated
+							text.
+						</td>
+						<td><code>false</code></td>
+					</tr>
+				</tbody>
+			</table>
 
-				<h2>Example Response</h2>
-				<pre
-					style="height: 24rem"
-				><code class="language-json" id="example-response">Loading</code></pre>
+			<blockquote>
+				The language code is in ISO-639-1 format. See all available code
+				listed
+				<a
+					href="https://cloud.google.com/translate/docs/languages"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					here</a
+				>.
+			</blockquote>
 
-				<h2>Disclaimer</h2>
+			<h2>Example Response</h2>
+			<div
+				style="height: 24rem"
+				class="overflow-y-auto not-prose"
+				id="example-response"
+			>Loading</div>
 
-				<ul>
-					<li>
-						This service is not provided by the official Google Translate. It is
-						provided as a service to the public for
-						<strong>educational purposes only</strong>.
-					</li>
-					<li>
-						This service has no guarantee that the translation will be accurate.
-						The service is not responsible for any errors or omissions. The
-						service is provided <strong>as is</strong> and
-						<strong>without warranty</strong>.
-					</li>
-					<li>
-						You can also self-host this service. See the source code below.
-					</li>
-				</ul>
+			<h2>Disclaimer</h2>
 
-				<h2>Source Code</h2>
-				<p>
-					GitHub:
-					<a href="https://github.com/Songkeys/Translateer">
-						Songkeys/Translateer
-					</a>
-				</p>
-			</article>
+			<ul>
+				<li>
+					This service is not provided by the official Google Translate. It is
+					provided as a service to the public for
+					<strong>educational purposes only</strong>.
+				</li>
+				<li>
+					This service has no guarantee that the translation will be accurate.
+					The service is not responsible for any errors or omissions. The
+					service is provided <strong>as is</strong> and
+					<strong>without warranty</strong>.
+				</li>
+				<li>
+					You can also self-host this service. See the source code below.
+				</li>
+			</ul>
 
-			<script src="https://unpkg.com/@highlightjs/cdn-assets@11.3.1/highlight.min.js"></script>
-			<script>
-				const entry = location.origin;
-				document.getElementById(
-					"usage-code"
-				).innerText = `$ curl '${entry}/api?text=hello&from=en&to=zh-CN'`;
+			<h2>Source Code</h2>
+			<p>
+				GitHub:
+				<a href="https://github.com/Songkeys/Translateer">
+					Songkeys/Translateer
+				</a>
+			</p>
 
-				fetch("api?text=do")
-					.then((res) => res.json())
-					.then((res) => {
-						document.getElementById("example-response").innerHTML =
-							`// ${entry}/api?text=do\n` + JSON.stringify(res, null, 2);
-						hljs.highlightAll();
-					});
-			</script>
-		</div>
+			<h2>Sponsor</h2>
+			<p>
+				If you find this project useful, please consider sponsoring me. It will be used to maintain the service and improve the quality.
+			</p>
+			<iframe src="https://github.com/sponsors/Songkeys/card" title="Sponsor Songkeys" height="200" width="100%" class="not-prose rounded-lg border-0"></iframe>
+		</article>
+
+		<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/preset-typography.global.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/preset-uno.global.js"></script>
+		<script>
+			window.__unocss = {
+				rules: [
+					// custom rules...
+				],
+				presets: [
+					() => window.__unocss_runtime.presets.presetTypography(),
+					() => window.__unocss_runtime.presets.presetUno(),
+				],
+			};
+		</script>
+		<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+		<script type="module">
+			import { codeToHtml } from 'https://esm.sh/shiki@1.0.0'
+
+			const entry = location.origin;
+
+			const usageCode = await codeToHtml(`$ curl '${entry}/api?text=hello&from=en&to=zh-CN'`, {
+				lang: 'bash',
+				theme: 'github-dark',
+			})
+
+			document.getElementById('usage-code').innerHTML = usageCode
+
+			fetch("api?text=do")
+				.then((res) => res.json())
+				.then(async (res) => {
+					document.getElementById("example-response").innerHTML =
+						await codeToHtml(JSON.stringify(res, null, 2), {
+							lang: 'json',
+							theme: 'github-dark',
+						})
+				});
+		</script>
+
 
 		<footer>
 			<div class="flex justify-center my-10">

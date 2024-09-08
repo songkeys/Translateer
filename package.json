@@ -14,15 +14,16 @@
 	"author": "Songkeys",
 	"license": "ISC",
 	"devDependencies": {
-		"@types/node": "^20.12.7",
+		"@types/node": "^22.5.4",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.4.5"
+		"typescript": "^5.5.4"
 	},
 	"dependencies": {
-		"@fastify/static": "^7.0.3",
-		"fastify": "^4.26.2",
-		"puppeteer": "^21.6.0",
+		"@fastify/static": "^7.0.4",
+		"fastify": "^4.28.1",
+		"puppeteer": "^23.3.0",
 		"puppeteer-extra": "^3.3.6",
 		"puppeteer-extra-plugin-stealth": "^2.11.2"
-	}
+	},
+	"packageManager": "pnpm@8.15.9"
 }

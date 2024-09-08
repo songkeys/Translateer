@@ -14,7 +14,7 @@ curl 'https://t.song.work/api?text=hello&from=en&to=zh-CN'
 
 Visit <https://t.song.work/> to see more usage.
 
-**This free demo can only serve 5 concurrent requests.** You are encouraged to host this service on your own server.
+**This free demo can only serve 5 concurrent requests.** It does not collect any data.
 
 ## Self-Hosted
 
