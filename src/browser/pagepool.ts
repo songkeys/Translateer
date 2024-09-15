@@ -41,57 +41,60 @@ export default class PagePool {
 	}
 
 	private async _initBrowser() {
+		const launchOptions = {
+			acceptInsecureCerts: true,
+			headless: process.env.DEBUG !== "true",
+			executablePath: executablePath(),
+			userDataDir: "/tmp/translateer-data",
+			args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+		};
+
 		this._browser = PUPPETEER_WS_ENDPOINT
 			? await puppeteer.connect({ browserWSEndpoint: PUPPETEER_WS_ENDPOINT })
-			: await puppeteer.launch({
-					acceptInsecureCerts: true,
-					headless: process.env.DEBUG !== "true" ? true : false,
-					executablePath: executablePath(),
-					userDataDir: "/tmp/translateer-data",
-					args: ["--no-sandbox"],
-			  });
+			: await puppeteer.launch(launchOptions);
 		console.log("browser launched");
 	}
 
 	private async _initPages() {
-		let created = 0;
 		this._pages = await Promise.all(
-			[...Array(this.pageCount)].map((_, i) =>
-				this._browser.newPage().then(async (page) => {
-					await page.setRequestInterception(true);
-					page.on("request", (req) => {
-						if (
-							req.resourceType() === "image" ||
-							req.resourceType() === "stylesheet" ||
-							req.resourceType() === "font"
-						) {
-							req.abort();
-						} else {
-							req.continue();
-						}
-					});
-					console.log(`page ${i} created`);
-					await page.goto("https://translate.google.com/details", {
-						waitUntil: "networkidle2",
-					});
-					console.log(`page ${i} loaded`);
-					// privacy consent
-					try {
-						const btnSelector = 'button[aria-label="Reject all"]';
-						await page.waitForSelector(btnSelector, { timeout: 1000 });
-						await page.$eval(btnSelector, (btn) => {
-							(btn as HTMLButtonElement).click();
-						});
-						console.log(`page ${i} privacy consent rejected`);
-					} catch {
-						console.log(`page ${i} privacy consent not found`);
-					}
-					created++;
-					console.log(`page ${i} ready (${created}/${this.pageCount})`);
-					return page;
-				})
-			)
+			Array(this.pageCount).fill(null).map(async (_, i) => {
+				const page = await this._browser.newPage();
+				await this._setupPage(page, i);
+				return page;
+			})
 		);
+	}
+
+	private async _setupPage(page: Page, index: number) {
+		await page.setCacheEnabled(false);
+		await page.setRequestInterception(true);
+		page.on("request", (req) => {
+			if (["image", "stylesheet", "font"].includes(req.resourceType())) {
+				req.abort();
+			} else {
+				req.continue();
+			}
+		});
+
+		console.log(`page ${index} created`);
+		await page.goto("https://translate.google.com/details", {
+			waitUntil: "networkidle2",
+		});
+		console.log(`page ${index} loaded`);
+
+		await this._handlePrivacyConsent(page, index);
+		console.log(`page ${index} ready (${this._pages.length + 1}/${this.pageCount})`);
+	}
+
+	private async _handlePrivacyConsent(page: Page, index: number) {
+		try {
+			const btnSelector = 'button[aria-label="Reject all"]';
+			await page.waitForSelector(btnSelector, { timeout: 1000 });
+			await page.click(btnSelector);
+			console.log(`page ${index} privacy consent rejected`);
+		} catch {
+			console.log(`page ${index} privacy consent not found`);
+		}
 	}
 
 	private _resetInterval(ms: number) {
