@@ -19,4 +19,4 @@ COPY . .
 RUN deno install
 
 # Run the app
-CMD ["deno", "run", "--allow-net", "src/app.ts"]
+CMD ["deno", "run", "-A", "src/app.ts"]
