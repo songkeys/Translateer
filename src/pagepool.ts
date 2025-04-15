@@ -1,7 +1,7 @@
-import { type Browser, executablePath, type Page } from "puppeteer";
-import puppeteer from "./puppeteer";
+import { connect } from "puppeteer-real-browser";
 
-const { PUPPETEER_WS_ENDPOINT } = process.env;
+export type Browser = Awaited<ReturnType<typeof connect>>["browser"];
+export type Page = Awaited<ReturnType<Browser["pages"]>>[number];
 
 export let pagePool: PagePool;
 
@@ -40,28 +40,37 @@ export default class PagePool {
 		this._pages.push(page);
 	}
 
-	private async _initBrowser() {
-		const launchOptions = {
-			acceptInsecureCerts: true,
-			headless: process.env.DEBUG !== "true",
-			executablePath: executablePath(),
-			userDataDir: "/tmp/translateer-data",
-			args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-		};
+	public async close() {
+		await this._browser.close();
+	}
 
-		this._browser = PUPPETEER_WS_ENDPOINT
-			? await puppeteer.connect({ browserWSEndpoint: PUPPETEER_WS_ENDPOINT })
-			: await puppeteer.launch(launchOptions);
+	private async _initBrowser() {
+		const { browser } = await connect({
+			headless: false,
+			args: [
+				"--no-sandbox",
+				"--disable-setuid-sandbox",
+				"--disable-dev-shm-usage",
+			],
+			customConfig: {},
+			turnstile: true,
+			connectOption: {},
+			disableXvfb: false,
+			ignoreAllFlags: false,
+		});
+		this._browser = browser;
 		console.log("browser launched");
 	}
 
 	private async _initPages() {
 		this._pages = await Promise.all(
-			Array(this.pageCount).fill(null).map(async (_, i) => {
-				const page = await this._browser.newPage();
-				await this._setupPage(page, i);
-				return page;
-			})
+			Array(this.pageCount)
+				.fill(null)
+				.map(async (_, i) => {
+					const page = await this._browser.newPage();
+					await this._setupPage(page, i);
+					return page;
+				}),
 		);
 	}
 
@@ -83,7 +92,9 @@ export default class PagePool {
 		console.log(`page ${index} loaded`);
 
 		await this._handlePrivacyConsent(page, index);
-		console.log(`page ${index} ready (${this._pages.length + 1}/${this.pageCount})`);
+		console.log(
+			`page ${index} ready (${this._pages.length + 1}/${this.pageCount})`,
+		);
 	}
 
 	private async _handlePrivacyConsent(page: Page, index: number) {

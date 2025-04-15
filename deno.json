@@ -1,0 +1,20 @@
+{
+	"tasks": {
+		"start": "deno run -A src/app.ts"
+	},
+	"imports": {
+		"@std/http": "jsr:@std/http@^1.0.14",
+		"@std/path": "jsr:@std/path@^1.0.8",
+		"puppeteer": "npm:puppeteer@24.6.1",
+		"puppeteer-extra": "npm:puppeteer-extra@3.3.6",
+		"puppeteer-extra-plugin-stealth": "npm:puppeteer-extra-plugin-stealth@2.11.2",
+		"puppeteer-real-browser": "npm:puppeteer-real-browser@^1.4.2"
+	},
+	"compilerOptions": {
+		"lib": ["deno.ns", "dom"]
+	},
+	"nodeModulesDir": "auto",
+	"fmt": {
+		"useTabs": true
+	}
+}

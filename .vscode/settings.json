@@ -1,0 +1,13 @@
+{
+	"deno.enable": true,
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "always",
+		"source.organizeImports": "always"
+	},
+	"editor.defaultFormatter": "denoland.vscode-deno",
+	"deno.lint": true,
+	"[typescript][javascript][json][markdown][html]": {
+		"editor.defaultFormatter": "denoland.vscode-deno"
+	}
+}
